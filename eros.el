@@ -259,7 +259,7 @@ This function also removes itself from `post-command-hook'."
         (advice-add 'eval-defun :filter-return #'eros--eval-defun-advice))
     (advice-remove 'eval-region #'eros--eval-region-advice)
     (advice-remove 'eval-last-sexp #'eros--eval-last-sexp-advice)
-    (advice-remove 'eval-last-sexp #'eros--eval-defun-advice)))
+    (advice-remove 'eval-defun #'eros--eval-defun-advice)))
 
 
 (provide 'eros)
