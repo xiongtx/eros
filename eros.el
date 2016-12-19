@@ -4,6 +4,7 @@
 
 ;; Author: Tianxiang Xiong <tianxiang.xiong@gmail.com>
 ;; Keywords: convenience, lisp
+;; Package-Requires: ((emacs "24.4"))
 ;; URL: https://github.com/xiongtx/eros
 ;; Version: 0.1.0
 
