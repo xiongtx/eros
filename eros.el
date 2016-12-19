@@ -68,7 +68,7 @@ font-locking it."
 
 If nil, overlays last indefinitely.
 
-If the symbol `command', they're erased after the next command."
+If the symbol `command', they're erased before the next command."
   :type '(choice (integer :tag "Duration in seconds")
                  (const :tag "Until next command" command)
                  (const :tag "Last indefinitely" nil))
@@ -184,14 +184,11 @@ the overlay."
                          props))
           (pcase duration
             ((pred numberp) (run-at-time duration nil #'eros--delete-overlay o))
-            (`command
-             ;; If inside a command-loop, tell `eros--remove-result-overlay'
-             ;; to only remove after the *next* command.
-             (if this-command
-                 (add-hook 'post-command-hook
-                           #'eros--remove-result-overlay-after-command
-                           nil 'local)
-               (eros--remove-result-overlay-after-command))))
+            (`command (if this-command
+                          (add-hook 'pre-command-hook
+                                    #'eros--remove-result-overlay
+                                    nil 'local)
+                        (eros--remove-result-overlay))))
           (let ((win (get-buffer-window buffer)))
             ;; Left edge is visible.
             (when (and win
@@ -208,16 +205,9 @@ the overlay."
 (defun eros--remove-result-overlay ()
   "Remove result overlay from current buffer.
 
-This function also removes itself from `post-command-hook'."
-  (remove-hook 'post-command-hook #'eros--remove-result-overlay 'local)
+This function also removes itself from `pre-command-hook'."
+  (remove-hook 'pre-command-hook #'eros--remove-result-overlay 'local)
   (remove-overlays nil nil 'category 'result))
-
-(defun eros--remove-result-overlay-after-command ()
-  "Add `eros--remove-result-overlay' locally to `post-command-hook'.
-
-This function also removes itself from `post-command-hook'."
-  (remove-hook 'post-command-hook #'eros--remove-result-overlay-after-command 'local)
-  (add-hook 'post-command-hook #'eros--remove-result-overlay nil 'local))
 
 (defun eros--eval-overlay (value point)
   "Make overlay for VALUE at POINT."
