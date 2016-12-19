@@ -219,28 +219,27 @@ This function also removes itself from `post-command-hook'."
   (remove-hook 'post-command-hook #'eros--remove-result-overlay-after-command 'local)
   (add-hook 'post-command-hook #'eros--remove-result-overlay nil 'local))
 
-
-;; Advice
 (defun eros--eval-overlay (value point)
   (eros--make-result-overlay (format "%S" value)
-                             :where point
-                             :duration eros-eval-result-duration)
+    :where point
+    :duration eros-eval-result-duration)
   value)
 
-(defun eros--eval-region-advice (f beg end &rest r)
-  "Advice for `eval-region' to display result overlay."
-  (eros--eval-overlay
-   (apply f beg end r)
-   end))
+
+;; API
 
-(defun eros--eval-last-sexp-advice (r)
-  "Advice for `eval-last-sexp' to display result overlay."
-  (eros--eval-overlay r (point)))
-
-(defun eros--eval-defun-advice (r)
-  "Advice for `eval-defun' to display result overlay."
+(defun eros-eval-last-sexp (eval-last-sexp-arg-internal)
+  "Wrapper for `eval-last-sexp' that overlays results."
+  (interactive "P")
   (eros--eval-overlay
-   r
+   (eval-last-sexp eval-last-sexp-arg-internal)
+   (point)))
+
+(defun eros-eval-defun (edebug-it)
+  "Wrapper for `eval-defun' that overlays results."
+  (interactive "P")
+  (eros--eval-overlay
+   (eval-defun edebug-it)
    (save-excursion
      (end-of-defun)
      (point))))
@@ -254,12 +253,10 @@ This function also removes itself from `post-command-hook'."
   :global t
   (if eros-mode
       (progn
-        (advice-add 'eval-region :around #'eros--eval-region-advice)
-        (advice-add 'eval-last-sexp :filter-return #'eros--eval-last-sexp-advice)
-        (advice-add 'eval-defun :filter-return #'eros--eval-defun-advice))
-    (advice-remove 'eval-region #'eros--eval-region-advice)
-    (advice-remove 'eval-last-sexp #'eros--eval-last-sexp-advice)
-    (advice-remove 'eval-last-sexp #'eros--eval-defun-advice)))
+        (global-set-key [remap eval-last-sexp] #'eros-eval-last-sexp)
+        (global-set-key [remap eval-defun] #'eros-eval-defun))
+    (global-set-key [remap eval-last-sexp] nil)
+    (global-set-key [remap eval-defun] nil)))
 
 
 (provide 'eros)
