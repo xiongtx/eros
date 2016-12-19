@@ -41,8 +41,8 @@
 
 (defcustom eros-eval-result-prefix "=> "
   "The prefix displayed in the minibuffer before a result value."
-  :type 'string
   :group 'eros
+  :type 'string
   :package-version '(eros "0.1.0"))
 
 (defface eros-result-overlay-face
@@ -61,7 +61,8 @@ with lower priority than the syntax highlighting."
 If nil, apply `eros-result-overlay-face' to the entire overlay instead of
 font-locking it."
   :group 'eros
-  :type 'boolean)
+  :type 'boolean
+  :package-version '(eros "0.1.0"))
 
 (defcustom eros-eval-result-duration 'command
   "Duration, in seconds, of eval-result overlays.
@@ -69,10 +70,11 @@ font-locking it."
 If nil, overlays last indefinitely.
 
 If the symbol `command', they're erased before the next command."
+  :group 'eros
   :type '(choice (integer :tag "Duration in seconds")
                  (const :tag "Until next command" command)
                  (const :tag "Last indefinitely" nil))
-  :group 'eros)
+  :package-version '(eros "0.1.0"))
 
 
 ;; Overlay
