@@ -220,6 +220,7 @@ This function also removes itself from `post-command-hook'."
   (add-hook 'post-command-hook #'eros--remove-result-overlay nil 'local))
 
 (defun eros--eval-overlay (value point)
+  "Make overlay for VALUE at POINT."
   (eros--make-result-overlay (format "%S" value)
     :where point
     :duration eros-eval-result-duration)
