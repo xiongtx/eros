@@ -138,7 +138,7 @@ All arguments beyond these (PROPS) are properties to be used on
 the overlay."
   (declare (indent 1))
   (while (keywordp (car props))
-    (setq props (cdr (cdr props))))
+    (setq props (cddr props)))
   ;; If the marker points to a dead buffer, don't do anything.
   (let ((buffer (cond
                  ((markerp where) (marker-buffer where))
