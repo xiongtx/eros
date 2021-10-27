@@ -1,12 +1,12 @@
 ;;; eros.el --- Evaluation Result OverlayS for Emacs Lisp   -*- lexical-binding: t; -*-
 
-;; Copyright (C) 2016-2018  Tianxiang Xiong
+;; Copyright (C) 2016-2021  Tianxiang Xiong
 
 ;; Author: Tianxiang Xiong <tianxiang.xiong@gmail.com>
 ;; Keywords: convenience, lisp
 ;; Package-Requires: ((emacs "24.4"))
 ;; URL: https://github.com/xiongtx/eros
-;; Version: 0.1.0
+;; Version: 0.2.0
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -212,31 +212,30 @@ This function also removes itself from `pre-command-hook'."
   (remove-hook 'pre-command-hook #'eros--remove-result-overlay 'local)
   (remove-overlays nil nil 'category 'result))
 
-(defun eros--eval-overlay (value point)
-  "Make overlay for VALUE at POINT."
-  (eros--make-result-overlay (format "%S" value)
-    :where point
-    :duration eros-eval-result-duration)
-  value)
 
 
 ;; API
 
+(defun eros-eval-overlay (value point)
+  "Make overlay for VALUE at POINT using FMT as format string."
+  (eros--make-result-overlay value
+    :where point
+    :duration eros-eval-result-duration))
+
 (defun eros-eval-last-sexp (eval-last-sexp-arg-internal)
   "Wrapper for `eval-last-sexp' that overlays results."
   (interactive "P")
-  (eros--eval-overlay
-   (eval-last-sexp eval-last-sexp-arg-internal)
-   (point)))
+  (let ((value (eval-last-sexp eval-last-sexp-arg-internal)))
+    (eros-eval-overlay (format "%S" value) (point))
+    value))
 
 (defun eros-eval-defun (edebug-it)
   "Wrapper for `eval-defun' that overlays results."
   (interactive "P")
-  (eros--eval-overlay
-   (eval-defun edebug-it)
-   (save-excursion
-     (end-of-defun)
-     (point))))
+  (let ((value (eval-defun edebug-it))
+        (point (save-excursion (end-of-defun) (point))))
+    (eros-eval-overlay (format "%S" value) point)
+    value))
 
 
 ;; Minor mode
