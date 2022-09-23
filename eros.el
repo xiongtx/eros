@@ -257,7 +257,9 @@ This function also removes itself from `pre-command-hook'."
   (interactive)
   (when eros--last-result
     (get-buffer-create eros--inspect-buffer-name)
-    (pp-display-expression eros--last-result eros--inspect-buffer-name)
+    (let ((print-length nil)
+          (print-level nil))
+      (pp-display-expression eros--last-result eros--inspect-buffer-name))
     (unless (get-buffer-window eros--inspect-buffer-name)
       (switch-to-buffer-other-window eros--inspect-buffer-name))))
 
