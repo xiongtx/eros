@@ -78,6 +78,16 @@ If the symbol `command', they're erased before the next command."
                  (const :tag "Last indefinitely" nil))
   :package-version '(eros "0.1.0"))
 
+(defcustom eros-inspect-hooks '()
+  "Hooks to run after eros-inspect buffer is opened. Especially
+useful for disabling stuff, like flycheck etc.
+
+    (add-hook 'eros-inspect-hooks (lambda () (flycheck-mode -1)))
+"
+  :group 'eros
+  :type 'hook
+  :package-version '(eros "0.1.0"))
+
 
 ;; Internals
 
@@ -259,7 +269,9 @@ This function also removes itself from `pre-command-hook'."
     (get-buffer-create eros--inspect-buffer-name)
     (let ((print-length nil)
           (print-level nil))
-      (pp-display-expression eros--last-result eros--inspect-buffer-name))
+      (pp-display-expression eros--last-result eros--inspect-buffer-name)
+      (with-current-buffer (get-buffer-create eros--inspect-buffer-name)
+        (run-hooks 'eros-inspect-hooks)))
     (unless (get-buffer-window eros--inspect-buffer-name)
       (switch-to-buffer-other-window eros--inspect-buffer-name))))
 
