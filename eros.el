@@ -222,6 +222,7 @@ This function also removes itself from `pre-command-hook'."
 
 ;; API
 
+;;;###autoload
 (defun eros-eval-last-sexp (eval-last-sexp-arg-internal)
   "Wrapper for `eval-last-sexp' that overlays results."
   (interactive "P")
@@ -229,6 +230,7 @@ This function also removes itself from `pre-command-hook'."
    (eval-last-sexp eval-last-sexp-arg-internal)
    (point)))
 
+;;;###autoload
 (defun eros-eval-defun (edebug-it)
   "Wrapper for `eval-defun' that overlays results."
   (interactive "P")
