@@ -31,6 +31,7 @@
 ;;; Code:
 
 (require 'cl-lib)
+(require 'pp)
 
 
 ;; Customize
@@ -76,6 +77,25 @@ If the symbol `command', they're erased before the next command."
                  (const :tag "Until next command" command)
                  (const :tag "Last indefinitely" nil))
   :package-version '(eros "0.1.0"))
+
+(defcustom eros-inspect-hooks '()
+  "Hooks to run after eros-inspect buffer is opened. Especially
+useful for disabling stuff, like flycheck etc.
+
+    (add-hook 'eros-inspect-hooks (lambda () (flycheck-mode -1)))
+"
+  :group 'eros
+  :type 'hook
+  :package-version '(eros "0.1.0"))
+
+
+;; Internals
+
+(defvar eros--inspect-buffer-name "*eros inspect*"
+  "Buffer name for showing pretty printed results.")
+
+(defvar eros--last-result nil
+  "Result of the last `eros-eval-*' call.")
 
 
 ;; Overlay
@@ -226,9 +246,13 @@ This function also removes itself from `pre-command-hook'."
 (defun eros-eval-last-sexp (eval-last-sexp-arg-internal)
   "Wrapper for `eval-last-sexp' that overlays results."
   (interactive "P")
-  (eros--eval-overlay
-   (eval-last-sexp eval-last-sexp-arg-internal)
-   (point)))
+  (let ((result (eval-last-sexp eval-last-sexp-arg-internal)))
+    (setq eros--last-result result)
+    (when (get-buffer eros--inspect-buffer-name)
+      (eros-inspect-last-result))
+    (eros--eval-overlay
+     result
+     (point))))
 
 ;;;###autoload
 (defun eros-eval-defun (edebug-it)
@@ -239,6 +263,19 @@ This function also removes itself from `pre-command-hook'."
    (save-excursion
      (end-of-defun)
      (point))))
+
+(defun eros-inspect-last-result ()
+  "Inspect the result of last `eros-eval-'."
+  (interactive)
+  (when eros--last-result
+    (get-buffer-create eros--inspect-buffer-name)
+    (let ((print-length nil)
+          (print-level nil))
+      (pp-display-expression eros--last-result eros--inspect-buffer-name)
+      (with-current-buffer (get-buffer-create eros--inspect-buffer-name)
+        (run-hooks 'eros-inspect-hooks)))
+    (unless (get-buffer-window eros--inspect-buffer-name)
+      (switch-to-buffer-other-window eros--inspect-buffer-name))))
 
 
 ;; Minor mode
