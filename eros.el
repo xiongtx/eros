@@ -6,7 +6,7 @@
 ;; Keywords: convenience, lisp
 ;; Package-Requires: ((emacs "24.4"))
 ;; URL: https://github.com/xiongtx/eros
-;; Version: 0.1.0
+;; Version: 0.2.0
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -32,6 +32,7 @@
 
 (require 'cl-lib)
 (require 'pp)
+(require 'pulse)
 
 
 ;; Customize
@@ -40,6 +41,12 @@
   "Evaluation Result OverlayS for Emacs Lisp"
   :prefix "eros-"
   :group 'lisp)
+
+(defcustom eros-pulse t
+  "The prefix displayed in the minibuffer before a result value."
+  :group 'eros
+  :type 'boolean
+  :package-version '(eros "0.2.0"))
 
 (defcustom eros-eval-result-prefix "=> "
   "The prefix displayed in the minibuffer before a result value."
@@ -114,6 +121,7 @@ PROPS is a plist of properties and values to add to the overlay."
     (overlay-put o 'eros-temporary t)
     (while props (overlay-put o (pop props) (pop props)))
     (push #'eros--delete-overlay (overlay-get o 'modification-hooks))
+    (when eros-pulse (pulse-momentary-highlight-region l r))
     o))
 
 (defun eros--delete-overlay (ov &rest _)
